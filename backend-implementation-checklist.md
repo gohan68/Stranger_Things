@@ -389,17 +389,17 @@
 ## 📚 Resources & Links
 
 ### Supabase:
-- [ ] Supabase Project URL: `TBD - User to provide`
-- [ ] Supabase Anon Key: `TBD - Will be added to .env`
-- [ ] Supabase Service Key: `TBD - Will be added to .env`
+- [x] Supabase Project URL: `https://ykhcfqconyixlatlezrk.supabase.co`
+- [x] Supabase Anon Key: `Configured in .env`
+- [x] Supabase Service Key: `Configured in .env`
 
 ### Google OAuth:
 - [ ] Google Client ID: `TBD - Will create in Phase 3`
 - [ ] Google Client Secret: `TBD - Will create in Phase 3`
 
 ### Email Provider:
-- [ ] Provider: `TBD - Will decide in Phase 7`
-- [ ] API Key: `TBD`
+- [x] Provider: `Resend`
+- [ ] API Key: `TBD - User to provide in Phase 7`
 
 ### Deployment:
 - [ ] Vercel Project URL: `TBD`
