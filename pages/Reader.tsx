@@ -239,6 +239,9 @@ export const Reader: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Comment Section */}
+      <CommentSection chapterId={currentChapter.id} />
     </div>
   );
 };
