@@ -29,9 +29,10 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
     loadComments();
 
     // Subscribe to real-time updates
-    const unsubscribe = subscribeToComments(chapterId, () => {
-      // Reload comments when there's a change
-      loadComments();
+    const unsubscribe = subscribeToComments(chapterId, (payload: any) => {
+      console.log('Real-time comment update:', payload);
+      // Reload comments when there's a change - but silently without showing skeleton
+      refreshComments();
     });
 
     return () => {
@@ -59,14 +60,19 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
     }
   };
 
-  const handleCommentAdded = async () => {
-    // Reload comments without showing skeleton (since we just added one)
+  // Silently refresh comments without showing loading state
+  const refreshComments = async () => {
     try {
       const data = await fetchComments(chapterId);
       setComments(data);
     } catch (err: any) {
       console.error('Error refreshing comments:', err);
     }
+  };
+
+  const handleCommentAdded = async () => {
+    // Reload comments without showing skeleton (since we just added one)
+    await refreshComments();
   };
 
   const handleCommentDeleted = (commentId: string) => {
