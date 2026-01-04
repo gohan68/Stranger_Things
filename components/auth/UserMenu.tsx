@@ -7,6 +7,7 @@ export const UserMenu: React.FC = () => {
   const { user, profile, isAdmin, signOut, isGuest } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,8 +22,19 @@ export const UserMenu: React.FC = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
-    setShowMenu(false);
+    if (isSigningOut) return; // Prevent multiple clicks
+    
+    try {
+      setIsSigningOut(true);
+      setShowMenu(false);
+      
+      console.log('Starting sign out process...');
+      await signOut();
+      console.log('Sign out completed');
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      setIsSigningOut(false);
+    }
   };
 
   return (
