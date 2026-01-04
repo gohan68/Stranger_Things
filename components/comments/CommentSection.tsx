@@ -18,6 +18,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toasts, removeToast, success, error: showError } = useToast();
 
   // Check if comments feature is enabled
   const commentsEnabled = import.meta.env.VITE_ENABLE_COMMENTS === 'true';
