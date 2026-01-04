@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Settings, ChevronLeft, ChevronRight, Menu as MenuIcon } from 'lucide-react';
 import { story } from '../story';
 import { ReaderSettings } from '../types';
+import { CommentSection } from '../components/comments/CommentSection';
 
 const defaultSettings: ReaderSettings = {
   fontSize: 18,
