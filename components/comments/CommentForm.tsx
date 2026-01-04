@@ -66,7 +66,9 @@ export const CommentForm: React.FC<CommentFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="bg-white/5 border border-white/10 rounded-lg p-4" data-testid="comment-form">
+      <label htmlFor="comment-input" className="sr-only">Write your comment</label>
       <textarea
+        id="comment-input"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Share your thoughts about this chapter..."
@@ -75,6 +77,8 @@ export const CommentForm: React.FC<CommentFormProps> = ({
         maxLength={2000}
         disabled={loading}
         data-testid="comment-textarea"
+        aria-label="Comment text"
+        aria-describedby={error ? "comment-error" : undefined}
       />
       
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
@@ -88,6 +92,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
                 onChange={(e) => setIsAnonymous(e.target.checked)}
                 className="w-4 h-4 accent-st-red"
                 disabled={loading}
+                aria-label="Post anonymously"
               />
               Post anonymously
             </label>
@@ -99,8 +104,8 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             </p>
           )}
 
-          <span className="text-xs text-gray-600">
-            {content.length}/2000
+          <span className="text-xs text-gray-600" aria-live="polite">
+            {content.length}/2000 characters
           </span>
         </div>
 
@@ -109,15 +114,16 @@ export const CommentForm: React.FC<CommentFormProps> = ({
           disabled={loading || !content.trim()}
           className="flex items-center gap-2 px-4 py-2 bg-st-red hover:bg-st-red-dim disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium text-sm"
           data-testid="comment-submit-button"
+          aria-label="Post comment"
         >
           {loading ? (
             <>
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
               Posting...
             </>
           ) : (
             <>
-              <Send size={16} />
+              <Send size={16} aria-hidden="true" />
               Post Comment
             </>
           )}
@@ -125,8 +131,14 @@ export const CommentForm: React.FC<CommentFormProps> = ({
       </div>
 
       {error && (
-        <div className="mt-3 text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded px-3 py-2">
-          {error}
+        <div 
+          id="comment-error"
+          className="mt-3 text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded px-3 py-2 flex items-start gap-2"
+          role="alert"
+          aria-live="assertive"
+        >
+          <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <span>{error}</span>
         </div>
       )}
     </form>
