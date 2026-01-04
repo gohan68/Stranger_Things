@@ -84,7 +84,7 @@ export const Reader: React.FC = () => {
     } else {
       window.scrollTo(0, 0);
     }
-  }, [currentChapter, getProgress]);
+  }, [currentChapter?.id]); // Only depend on chapter ID, not getProgress function
 
   // If no ID provided, redirect to saved or first
   useEffect(() => {
