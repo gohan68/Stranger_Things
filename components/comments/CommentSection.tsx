@@ -117,7 +117,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
               <div>
                 <p className="text-red-400 text-sm font-medium">{error}</p>
                 <button 
-                  onClick={loadComments}
+                  onClick={() => loadComments(true)}
                   className="mt-2 text-xs text-red-300 hover:text-red-200 underline"
                   aria-label="Retry loading comments"
                 >
