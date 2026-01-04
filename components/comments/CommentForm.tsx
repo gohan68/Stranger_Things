@@ -10,7 +10,12 @@ interface CommentFormProps {
   onError?: (message: string) => void;
 }
 
-export const CommentForm: React.FC<CommentFormProps> = ({ chapterId, onCommentAdded }) => {
+export const CommentForm: React.FC<CommentFormProps> = ({ 
+  chapterId, 
+  onCommentAdded,
+  onSuccess,
+  onError 
+}) => {
   const { user, isGuest } = useAuth();
   const [content, setContent] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(isGuest);
@@ -21,12 +26,16 @@ export const CommentForm: React.FC<CommentFormProps> = ({ chapterId, onCommentAd
     e.preventDefault();
     
     if (!content.trim()) {
-      setError('Please enter a comment');
+      const errorMsg = 'Please enter a comment';
+      setError(errorMsg);
+      onError?.(errorMsg);
       return;
     }
 
     if (content.length > 2000) {
-      setError('Comment is too long (max 2000 characters)');
+      const errorMsg = 'Comment is too long (max 2000 characters)';
+      setError(errorMsg);
+      onError?.(errorMsg);
       return;
     }
 
@@ -44,9 +53,12 @@ export const CommentForm: React.FC<CommentFormProps> = ({ chapterId, onCommentAd
       setContent('');
       setIsAnonymous(isGuest);
       onCommentAdded();
+      onSuccess?.('Comment posted successfully!');
     } catch (err: any) {
       console.error('Error posting comment:', err);
-      setError(err.message || 'Failed to post comment. Please try again.');
+      const errorMsg = err.message || 'Failed to post comment. Please try again.';
+      setError(errorMsg);
+      onError?.(errorMsg);
     } finally {
       setLoading(false);
     }
