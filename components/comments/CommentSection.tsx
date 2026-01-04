@@ -6,6 +6,8 @@ import { CommentForm } from './CommentForm';
 import { CommentItem } from './CommentItem';
 import { useAuth } from '../../contexts/AuthContext';
 import { CommentsSkeleton } from '../ui/LoadingSkeleton';
+import { useToast } from '../../hooks/useToast';
+import { ToastContainer } from '../ui/Toast';
 
 interface CommentSectionProps {
   chapterId: string;
