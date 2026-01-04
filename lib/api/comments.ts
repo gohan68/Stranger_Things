@@ -19,11 +19,19 @@ export const fetchComments = async (chapterId: string): Promise<CommentWithAutho
       .eq('is_deleted', false)
       .order('created_at', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      // If table doesn't exist or there's a database issue, return empty array
+      if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        console.warn('Comments table not initialized yet. Please run the schema.sql in Supabase.');
+        return [];
+      }
+      throw error;
+    }
     return data || [];
   } catch (error) {
     console.error('Error fetching comments:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent UI crashes
+    return [];
   }
 };
 
