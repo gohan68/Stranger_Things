@@ -65,9 +65,11 @@ export const useReadingProgress = () => {
       if (!progressSyncEnabled) return;
 
       // Always save to localStorage immediately
-      const newProgress = { ...progress, [chapterId]: scrollPercentage };
-      setProgress(newProgress);
-      localStorage.setItem('chapterScrollPositions', JSON.stringify(newProgress));
+      setProgress(prevProgress => {
+        const newProgress = { ...prevProgress, [chapterId]: scrollPercentage };
+        localStorage.setItem('chapterScrollPositions', JSON.stringify(newProgress));
+        return newProgress;
+      });
 
       // For authenticated users, debounce Supabase saves (every 5 seconds)
       if (user && !isGuest) {
@@ -85,7 +87,7 @@ export const useReadingProgress = () => {
         }
       }
     },
-    [user, isGuest, progress, lastSaveTime, progressSyncEnabled]
+    [user, isGuest, lastSaveTime, progressSyncEnabled]
   );
 
   const getProgress = (chapterId: string): number => {
