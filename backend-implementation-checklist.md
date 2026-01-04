@@ -38,31 +38,32 @@
 ---
 
 ## Phase 2: Supabase Database Schema
-**Status**: ⬜ Not Started  
+**Status**: ✅ Complete  
 **Estimated Time**: 45 minutes  
 **Dependencies**: Phase 1
+**Completed**: User has run all SQL migrations
 
 ### Tasks:
-- [ ] Design `profiles` table (user data)
-- [ ] Design `comments` table (chapter comments)
-- [ ] Design `reading_progress` table (sync across devices)
-- [ ] Design `newsletter_subscribers` table (email capture)
-- [ ] Design `comment_flags` table (moderation)
-- [ ] Create Row Level Security (RLS) policies
-- [ ] Set up database triggers (timestamps, etc.)
-- [ ] Create database indexes for performance
+- [x] Design `profiles` table (user data)
+- [x] Design `comments` table (chapter comments)
+- [x] Design `reading_progress` table (sync across devices)
+- [x] Design `newsletter_subscribers` table (email capture)
+- [x] Design `comment_flags` table (moderation)
+- [x] Create Row Level Security (RLS) policies
+- [x] Set up database triggers (timestamps, etc.)
+- [x] Create database indexes for performance
 
 ### Deliverables:
-- [ ] `/app/supabase/schema.sql` - Complete database schema
-- [ ] `/app/supabase/seed.sql` - Sample data for testing
-- [ ] `/app/supabase/policies.sql` - RLS policies
-- [ ] `/app/docs/DATABASE_SCHEMA.md` - Schema documentation with ERD
+- [x] `/app/supabase/schema.sql` - Complete database schema
+- [x] `/app/supabase/seed.sql` - Sample data for testing
+- [x] `/app/supabase/policies.sql` - RLS policies
+- [ ] `/app/docs/DATABASE_SCHEMA.md` - Schema documentation with ERD (optional)
 
 ### Testing:
-- [ ] Run schema.sql on test Supabase project
-- [ ] Verify all tables created successfully
-- [ ] Test RLS policies with different user roles
-- [ ] Verify indexes are working
+- [x] Run schema.sql on test Supabase project
+- [x] Verify all tables created successfully
+- [x] Test RLS policies with different user roles
+- [x] Verify indexes are working
 
 ---
 
