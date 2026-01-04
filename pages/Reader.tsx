@@ -41,21 +41,29 @@ export const Reader: React.FC = () => {
     localStorage.setItem('readerSettings', JSON.stringify(settings));
   }, [settings]);
 
-  // Save progress on scroll
+  // Save progress on scroll with throttling
   useEffect(() => {
     if (!currentChapter) return;
 
-    const handleScroll = () => {
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.scrollY;
-      const scrollPercentage = (scrollTop / (documentHeight - windowHeight)) * 100;
+    let ticking = false;
 
-      // Save progress (debounced in hook)
-      saveProgress(currentChapter.id, Math.min(scrollPercentage, 100));
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight;
+          const scrollTop = window.scrollY;
+          const scrollPercentage = (scrollTop / (documentHeight - windowHeight)) * 100;
+
+          // Save progress (debounced in hook)
+          saveProgress(currentChapter.id, Math.min(scrollPercentage, 100));
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [currentChapter, saveProgress]);
 
