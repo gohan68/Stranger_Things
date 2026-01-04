@@ -59,7 +59,9 @@ export const fetchComments = async (chapterId: string): Promise<CommentWithAutho
 export const createComment = async (commentData: CreateCommentData): Promise<Comment> => {
   try {
     // Rate limiting check (simple client-side check)
-    const rateLimitKey = `comment_rate_limit_${Date.now()}`;
+    // Use a fixed time window (current hour) for rate limiting
+    const currentHour = Math.floor(Date.now() / 3600000);
+    const rateLimitKey = `comment_rate_limit_${currentHour}`;
     const recentComments = localStorage.getItem(rateLimitKey);
     
     if (recentComments) {
@@ -70,6 +72,7 @@ export const createComment = async (commentData: CreateCommentData): Promise<Com
       localStorage.setItem(rateLimitKey, (count + 1).toString());
     } else {
       localStorage.setItem(rateLimitKey, '1');
+      // Clean up old rate limit keys
       setTimeout(() => localStorage.removeItem(rateLimitKey), 3600000); // 1 hour
     }
 
@@ -79,11 +82,20 @@ export const createComment = async (commentData: CreateCommentData): Promise<Com
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error creating comment:', error);
+      throw new Error(error.message || 'Failed to post comment. Please try again.');
+    }
+    
+    if (!data) {
+      throw new Error('No data returned from comment creation');
+    }
+    
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating comment:', error);
-    throw error;
+    // Ensure we throw a user-friendly error message
+    throw new Error(error.message || 'Failed to post comment. Please try again.');
   }
 };
 
