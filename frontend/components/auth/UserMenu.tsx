@@ -14,6 +14,20 @@ export const UserMenu: React.FC = () => {
   // Get display name from profile or fall back to user metadata
   const displayName = profile?.display_name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'User';
 
+  // Debug logging
+  useEffect(() => {
+    if (user) {
+      console.log('UserMenu - User data:', {
+        userId: user.id,
+        email: user.email,
+        metadata: user.user_metadata,
+        profile: profile,
+        avatarUrl: avatarUrl,
+        displayName: displayName
+      });
+    }
+  }, [user, profile, avatarUrl, displayName]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
