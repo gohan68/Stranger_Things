@@ -12,11 +12,11 @@ export interface CreateCommentData {
  */
 export const fetchComments = async (chapterId: string): Promise<CommentWithAuthor[]> => {
   try {
+    // Note: The view already filters out deleted comments, so we don't need to filter by is_deleted
     const { data, error } = await supabase
       .from('comments_with_authors')
       .select('*')
       .eq('chapter_id', chapterId)
-      .eq('is_deleted', false)
       .order('created_at', { ascending: true });
 
     if (error) {
