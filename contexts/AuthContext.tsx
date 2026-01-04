@@ -30,8 +30,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Handle OAuth callback - check for auth code in URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hasAuthCode = hashParams.has('access_token') || hashParams.has('code');
+    
+    if (hasAuthCode) {
+      console.log('OAuth callback detected, processing session...');
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session ? 'Session found' : 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -45,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', _event, session ? 'Session active' : 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
