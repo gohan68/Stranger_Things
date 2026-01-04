@@ -191,95 +191,18 @@
 ---
 
 ## Phase 6: Dynamic OpenGraph Images
-**Status**: ⬜ Not Started  
+**Status**: ⏭️ Skipped (Low Priority)  
 **Estimated Time**: 1.5 hours  
 **Dependencies**: None (can be done in parallel)
-
-### Tasks:
-
-#### Serverless Function:
-- [ ] Create Vercel serverless function structure
-- [ ] Install required dependencies (@vercel/og or similar)
-- [ ] Implement OG image generation logic
-- [ ] Add chapter-specific content (title, excerpt)
-- [ ] Optimize image size and format
-- [ ] Add caching headers
-- [ ] Handle errors gracefully
-
-#### Frontend Integration:
-- [ ] Add dynamic meta tags per chapter
-- [ ] Implement meta tag component
-- [ ] Add fallback static OG image
-- [ ] Test with social media validators
-
-### Deliverables:
-- [ ] `/app/api/og/[chapterId].ts` - Vercel function
-- [ ] `/app/src/components/MetaTags.tsx` - Dynamic meta component
-- [ ] `/app/public/og-default.png` - Fallback image
-- [ ] `/app/vercel.json` - Vercel configuration
-- [ ] `/app/docs/OG_IMAGES_GUIDE.md` - Setup and testing guide
-
-### Testing:
-- [ ] Test OG image generation locally
-- [ ] Test all chapter IDs generate valid images
-- [ ] Validate with Twitter Card Validator
-- [ ] Validate with Facebook Sharing Debugger
-- [ ] Test fallback image for errors
-- [ ] Test caching behavior
-- [ ] Test performance/generation speed
+**Note**: Can be implemented later with Vercel functions. Static OG images work for now.
 
 ---
 
 ## Phase 7: Newsletter System
-**Status**: ⬜ Not Started  
+**Status**: ⏭️ Skipped (Per User Request)  
 **Estimated Time**: 2 hours  
 **Dependencies**: Phase 2
-
-### Tasks:
-
-#### Email Service Setup:
-- [ ] Choose email provider (Resend, SendGrid, or Mailgun)
-- [ ] Set up email API credentials
-- [ ] Create email templates
-- [ ] Implement double opt-in (confirmation email)
-- [ ] Add unsubscribe functionality
-- [ ] Implement GDPR compliance features
-
-#### Backend API:
-- [ ] Create newsletter subscription endpoint
-- [ ] Create confirmation endpoint
-- [ ] Create unsubscribe endpoint
-- [ ] Create admin endpoint to send newsletters
-- [ ] Add email validation
-- [ ] Implement rate limiting
-
-#### Frontend Components:
-- [ ] Create newsletter signup form (footer or modal)
-- [ ] Create success/error feedback UI
-- [ ] Create confirmation page
-- [ ] Create unsubscribe page
-- [ ] Add admin newsletter composer (optional)
-
-### Deliverables:
-- [ ] `/app/api/newsletter/subscribe.ts` - Subscription endpoint
-- [ ] `/app/api/newsletter/confirm.ts` - Confirmation endpoint
-- [ ] `/app/api/newsletter/unsubscribe.ts` - Unsubscribe endpoint
-- [ ] `/app/src/components/NewsletterForm.tsx` - Signup form
-- [ ] `/app/src/pages/NewsletterConfirm.tsx` - Confirmation page
-- [ ] `/app/src/pages/NewsletterUnsubscribe.tsx` - Unsubscribe page
-- [ ] `/app/email-templates/` - Email templates
-- [ ] `/app/docs/NEWSLETTER_GUIDE.md` - Setup guide
-
-### Testing:
-- [ ] Test email subscription flow
-- [ ] Test confirmation email delivery
-- [ ] Test double opt-in process
-- [ ] Test unsubscribe link
-- [ ] Test duplicate email handling
-- [ ] Test invalid email rejection
-- [ ] Test rate limiting
-- [ ] Test GDPR compliance (data export/delete)
-- [ ] Test email templates in multiple clients
+**Note**: Skipped per user request to focus on core features.
 
 ---
 
