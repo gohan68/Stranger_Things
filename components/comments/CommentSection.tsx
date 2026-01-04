@@ -76,18 +76,30 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
         <CommentForm chapterId={chapterId} onCommentAdded={handleCommentAdded} />
 
         {/* Comments List */}
-        <div className="mt-8 space-y-6">
+        <div className="mt-8 space-y-6" role="list" aria-label="Comments">
           {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="animate-spin text-st-red" size={32} />
-            </div>
+            <CommentsSkeleton count={3} />
           ) : error ? (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 text-red-400 text-sm">
-              {error}
+            <div 
+              className="bg-red-900/20 border border-red-500/30 rounded-lg p-4 flex items-start gap-3"
+              role="alert"
+              aria-live="polite"
+            >
+              <AlertCircle className="text-red-400 flex-shrink-0 mt-0.5" size={20} />
+              <div>
+                <p className="text-red-400 text-sm font-medium">{error}</p>
+                <button 
+                  onClick={loadComments}
+                  className="mt-2 text-xs text-red-300 hover:text-red-200 underline"
+                  aria-label="Retry loading comments"
+                >
+                  Try again
+                </button>
+              </div>
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              <MessageCircle size={48} className="mx-auto mb-4 opacity-30" />
+              <MessageCircle size={48} className="mx-auto mb-4 opacity-30" aria-hidden="true" />
               <p className="text-lg">No comments yet.</p>
               <p className="text-sm mt-2">Be the first to share your thoughts!</p>
             </div>
