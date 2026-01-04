@@ -24,14 +24,21 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
   const commentsEnabled = import.meta.env.VITE_ENABLE_COMMENTS === 'true';
 
   useEffect(() => {
-    if (!commentsEnabled) return;
+    if (!commentsEnabled) {
+      setLoading(false);
+      return;
+    }
+
+    // Reset loading state when chapter changes
+    setLoading(true);
+    setError(null);
 
     loadComments();
 
     // Subscribe to real-time updates
     const unsubscribe = subscribeToComments(chapterId, () => {
-      // Reload comments when there's a change
-      loadComments();
+      // Reload comments when there's a change, but don't show loading skeleton
+      loadComments(false);
     });
 
     return () => {
@@ -39,8 +46,11 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
     };
   }, [chapterId, commentsEnabled]);
 
-  const loadComments = async () => {
+  const loadComments = async (showLoading = true) => {
     try {
+      if (showLoading) {
+        setLoading(true);
+      }
       setError(null);
       const data = await fetchComments(chapterId);
       setComments(data);
@@ -54,12 +64,15 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
         setError('Failed to load comments. Please try again later.');
       }
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
   const handleCommentAdded = () => {
-    loadComments();
+    // Don't show loading skeleton when adding new comment
+    loadComments(false);
   };
 
   const handleCommentDeleted = (commentId: string) => {
