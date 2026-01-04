@@ -20,6 +20,20 @@ export const fetchComments = async (chapterId: string): Promise<CommentWithAutho
       .order('created_at', { ascending: true });
 
     if (error) {
+      console.error('Supabase error fetching comments:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+
+      // Check for permission/policy errors
+      if (error.code === '42501' || error.message.includes('permission denied') || error.message.includes('policy')) {
+        console.error('⚠️ RLS POLICY ERROR: The comments_with_authors view is restricted.');
+        console.error('🔧 FIX: Run /app/supabase/fix-view-permissions.sql in Supabase SQL Editor');
+        throw new Error('Permission denied. Please check database policies.');
+      }
+
       // If table doesn't exist or there's a database issue, return empty array
       if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
         console.warn('Comments table not initialized yet. Please run the schema.sql in Supabase.');
@@ -28,9 +42,13 @@ export const fetchComments = async (chapterId: string): Promise<CommentWithAutho
       throw error;
     }
     return data || [];
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching comments:', error);
-    // Return empty array instead of throwing to prevent UI crashes
+    // If it's a permission error, throw it to show user a message
+    if (error.message?.includes('Permission denied')) {
+      throw error;
+    }
+    // Otherwise return empty array to prevent UI crashes
     return [];
   }
 };
