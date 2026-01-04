@@ -6,6 +6,7 @@ import { Home } from './pages/Home';
 import { Reader } from './pages/Reader';
 import { ChapterIndex } from './pages/ChapterIndex';
 import { About, Legal } from './pages/StaticPages';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
             <Route path="/read/:chapterId" element={<Reader />} />
             <Route path="/about" element={<About />} />
             <Route path="/legal" element={<Legal />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
