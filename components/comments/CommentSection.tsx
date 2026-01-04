@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Loader2 } from 'lucide-react';
+import { MessageCircle, Loader2, AlertCircle } from 'lucide-react';
 import { CommentWithAuthor } from '../../lib/supabase';
 import { fetchComments, subscribeToComments } from '../../lib/api/comments';
 import { CommentForm } from './CommentForm';
 import { CommentItem } from './CommentItem';
 import { useAuth } from '../../contexts/AuthContext';
+import { CommentsSkeleton } from '../ui/LoadingSkeleton';
 
 interface CommentSectionProps {
   chapterId: string;
