@@ -72,6 +72,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   {link.name}
                 </Link>
               ))}
+              <div className="px-3 py-2">
+                <UserMenu />
+              </div>
             </div>
           </div>
         )}
