@@ -30,42 +30,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Handle OAuth callback - check for auth code in URL
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const hasAuthCode = hashParams.has('access_token') || hashParams.has('code');
-    
-    if (hasAuthCode) {
-      console.log('OAuth callback detected, processing session...');
-    }
+    let mounted = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session ? 'Session found' : 'No session');
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        // First, check if there's a hash with auth params (OAuth callback)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const hasAuthParams = hashParams.has('access_token') || hashParams.has('code');
+        
+        if (hasAuthParams) {
+          console.log('OAuth callback detected, waiting for session...');
+          // Give Supabase time to process the OAuth callback
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+
+        // Get the session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+        }
+
+        if (mounted) {
+          console.log('Session status:', session ? 'Active' : 'None');
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            await fetchProfile(session.user.id);
+          } else {
+            setLoading(false);
+          }
+
+          // Clean up URL hash after processing OAuth callback
+          if (hasAuthParams && session) {
+            console.log('Cleaning up OAuth params from URL...');
+            window.history.replaceState(null, '', window.location.pathname + '#/');
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', _event, session ? 'Session active' : 'No session');
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-        setLoading(false);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session ? 'Session active' : 'No session');
+      
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = async (userId: string) => {
