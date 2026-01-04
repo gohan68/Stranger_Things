@@ -16,6 +16,7 @@ export const Reader: React.FC = () => {
   const { chapterId } = useParams<{ chapterId?: string }>();
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement>(null);
+  const { saveProgress, getProgress } = useReadingProgress();
   
   // State
   const [settings, setSettings] = useState<ReaderSettings>(() => {
@@ -40,25 +41,53 @@ export const Reader: React.FC = () => {
     localStorage.setItem('readerSettings', JSON.stringify(settings));
   }, [settings]);
 
+  // Save progress on scroll
   useEffect(() => {
-    // Save progress
+    if (!currentChapter) return;
+
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const scrollPercentage = (scrollTop / (documentHeight - windowHeight)) * 100;
+
+      // Save progress (debounced in hook)
+      saveProgress(currentChapter.id, Math.min(scrollPercentage, 100));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentChapter, saveProgress]);
+
+  useEffect(() => {
+    // Save last read chapter
     if (currentChapter) {
-        localStorage.setItem('lastReadChapter', currentChapter.id);
+      localStorage.setItem('lastReadChapter', currentChapter.id);
     }
-    // Scroll to top on chapter change
-    window.scrollTo(0, 0);
-  }, [currentChapter]);
+    // Scroll to saved position or top
+    const savedProgress = getProgress(currentChapter?.id || '');
+    if (savedProgress > 0) {
+      setTimeout(() => {
+        const documentHeight = document.documentElement.scrollHeight;
+        const windowHeight = window.innerHeight;
+        const scrollTop = (savedProgress / 100) * (documentHeight - windowHeight);
+        window.scrollTo(0, scrollTop);
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [currentChapter, getProgress]);
 
   // If no ID provided, redirect to saved or first
   useEffect(() => {
-      if (!chapterId) {
-          const saved = localStorage.getItem('lastReadChapter');
-          if (saved) {
-              navigate(`/read/${saved}`, { replace: true });
-          } else {
-              navigate(`/read/${story.chapters[0].id}`, { replace: true });
-          }
+    if (!chapterId) {
+      const saved = localStorage.getItem('lastReadChapter');
+      if (saved) {
+        navigate(`/read/${saved}`, { replace: true });
+      } else {
+        navigate(`/read/${story.chapters[0].id}`, { replace: true });
       }
+    }
   }, [chapterId, navigate]);
 
   if (!currentChapter) return <div>Loading...</div>;
