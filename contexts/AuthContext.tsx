@@ -114,12 +114,78 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error('Error fetching profile:', error);
       } else {
-        setProfile(data);
+        // If profile exists but avatar_url is missing, try to sync from user metadata
+        if (data && !data.avatar_url) {
+          await syncProfileFromMetadata(userId);
+        } else {
+          setProfile(data);
+        }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncProfileFromMetadata = async (userId: string) => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (authUser?.user_metadata) {
+        const avatarUrl = authUser.user_metadata.picture || 
+                         authUser.user_metadata.avatar_url || 
+                         authUser.user_metadata.avatar;
+        
+        const displayName = authUser.user_metadata.full_name || 
+                           authUser.user_metadata.name || 
+                           authUser.user_metadata.display_name;
+
+        if (avatarUrl || displayName) {
+          console.log('Syncing profile from Google metadata:', { avatarUrl, displayName });
+          
+          // Update the profile with Google data
+          const { data: updatedProfile, error } = await supabase
+            .from('profiles')
+            .update({
+              avatar_url: avatarUrl || undefined,
+              display_name: displayName || undefined,
+            })
+            .eq('id', userId)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Error updating profile:', error);
+            // Fetch the profile anyway
+            const { data } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .single();
+            setProfile(data);
+          } else {
+            setProfile(updatedProfile);
+          }
+        } else {
+          // No metadata to sync, just use existing profile
+          const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          setProfile(data);
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing profile from metadata:', error);
+      // Fallback to fetching the profile
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      setProfile(data);
     }
   };
 
