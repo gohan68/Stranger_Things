@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, AlertCircle } from 'lucide-react';
 import { createComment } from '../../lib/api/comments';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface CommentFormProps {
   chapterId: string;
   onCommentAdded: () => void;
+  onSuccess?: (message: string) => void;
+  onError?: (message: string) => void;
 }
 
 export const CommentForm: React.FC<CommentFormProps> = ({ chapterId, onCommentAdded }) => {
