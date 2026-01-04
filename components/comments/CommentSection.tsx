@@ -124,5 +124,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
         </div>
       </div>
     </div>
+    <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </>
   );
 };
