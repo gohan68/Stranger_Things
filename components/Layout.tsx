@@ -151,7 +151,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </footer>
 
       {/* Auth Modal */}
-      {showAuth && <LoginModal onClose={() => setShowAuth(false)} />}
+      <LoginModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 };
