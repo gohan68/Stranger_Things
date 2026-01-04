@@ -42,6 +42,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     {link.name}
                   </Link>
                 ))}
+                <UserMenu />
               </div>
             </div>
 
