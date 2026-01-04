@@ -42,6 +42,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
   const loadComments = async () => {
     try {
       setError(null);
+      // Don't reset loading to true if we're already loaded (avoids skeleton flash on refresh)
       const data = await fetchComments(chapterId);
       setComments(data);
     } catch (err: any) {
@@ -58,8 +59,14 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
     }
   };
 
-  const handleCommentAdded = () => {
-    loadComments();
+  const handleCommentAdded = async () => {
+    // Reload comments without showing skeleton (since we just added one)
+    try {
+      const data = await fetchComments(chapterId);
+      setComments(data);
+    } catch (err: any) {
+      console.error('Error refreshing comments:', err);
+    }
   };
 
   const handleCommentDeleted = (commentId: string) => {
