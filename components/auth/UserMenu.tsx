@@ -113,11 +113,12 @@ export const UserMenu: React.FC = () => {
 
               <button
                 onClick={handleSignOut}
-                className="w-full px-4 py-2 text-sm text-left text-red-400 hover:bg-white/5 flex items-center gap-2"
+                disabled={isSigningOut}
+                className="w-full px-4 py-2 text-sm text-left text-red-400 hover:bg-white/5 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="signout-button"
               >
                 <LogOut size={16} />
-                Sign Out
+                {isSigningOut ? 'Signing Out...' : 'Sign Out'}
               </button>
             </div>
           </div>
