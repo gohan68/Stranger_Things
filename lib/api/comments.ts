@@ -1,4 +1,4 @@
-import { supabase, Comment, CommentWithAuthor } from './supabase';
+import { supabase, Comment, CommentWithAuthor } from '../supabase';
 
 export interface CreateCommentData {
   chapter_id: string;
