@@ -56,10 +56,11 @@ export const CommentForm: React.FC<CommentFormProps> = ({
       onSuccess?.('Comment posted successfully!');
     } catch (err: any) {
       console.error('Error posting comment:', err);
-      const errorMsg = err.message || 'Failed to post comment. Please try again.';
+      const errorMsg = err?.message || 'Failed to post comment. Please try again.';
       setError(errorMsg);
       onError?.(errorMsg);
     } finally {
+      // Always clear loading state
       setLoading(false);
     }
   };
