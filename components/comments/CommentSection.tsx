@@ -44,6 +44,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
       setError(null);
       const data = await fetchComments(chapterId);
       setComments(data);
+      // If we got an empty array and there was a database issue, it would have been logged
+      // We don't show an error to users - just show "No comments yet"
     } catch (err) {
       console.error('Error loading comments:', err);
       setError('Failed to load comments. Please try again later.');
