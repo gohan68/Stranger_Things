@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, currentUser?: User | null) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -113,13 +113,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error);
-      } else {
+        // If profile doesn't exist, try to create it from user metadata
+        const userToUse = currentUser || user;
+        if (userToUse && error.code === 'PGRST116') {
+          console.log('Profile not found, creating from user metadata...');
+          await createProfileFromUser(userToUse);
+        }
+      } else if (data) {
+        // Check if profile needs to be updated with Google picture
+        const userToUse = currentUser || user;
+        const googlePicture = userToUse?.user_metadata?.picture || userToUse?.user_metadata?.avatar_url;
+        const googleName = userToUse?.user_metadata?.full_name || userToUse?.user_metadata?.name;
+        
+        // Update profile if avatar_url or display_name is missing but available from Google
+        if ((!data.avatar_url && googlePicture) || (!data.display_name && googleName)) {
+          console.log('Updating profile with Google metadata...');
+          const updates: Partial<Profile> = {};
+          if (!data.avatar_url && googlePicture) updates.avatar_url = googlePicture;
+          if (!data.display_name && googleName) updates.display_name = googleName;
+          
+          const { data: updatedProfile, error: updateError } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', userId)
+            .select()
+            .single();
+          
+          if (!updateError && updatedProfile) {
+            setProfile(updatedProfile);
+            return;
+          }
+        }
         setProfile(data);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createProfileFromUser = async (currentUser: User) => {
+    try {
+      const googlePicture = currentUser.user_metadata?.picture || currentUser.user_metadata?.avatar_url;
+      const googleName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || currentUser.email;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: currentUser.id,
+          display_name: googleName,
+          avatar_url: googlePicture,
+          is_admin: false
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating profile:', error);
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error);
     }
   };
 
