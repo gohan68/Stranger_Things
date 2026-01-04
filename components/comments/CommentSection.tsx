@@ -44,11 +44,15 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
       setError(null);
       const data = await fetchComments(chapterId);
       setComments(data);
-      // If we got an empty array and there was a database issue, it would have been logged
-      // We don't show an error to users - just show "No comments yet"
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading comments:', err);
-      setError('Failed to load comments. Please try again later.');
+      
+      // Show specific error for permission issues
+      if (err.message?.includes('Permission denied') || err.message?.includes('policy')) {
+        setError('Comments are currently unavailable due to database permissions. Please check the setup guide.');
+      } else {
+        setError('Failed to load comments. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
