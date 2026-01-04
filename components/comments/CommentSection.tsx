@@ -65,18 +65,24 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12" data-testid="comment-section">
-      <div className="border-t border-gray-700 pt-8">
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-6">
-          <MessageCircle className="text-st-red" size={24} />
-          <h2 className="text-2xl font-display font-bold text-gray-200">
-            Comments <span className="text-gray-500 text-lg">({comments.length})</span>
-          </h2>
-        </div>
+    <>
+      <div className="max-w-3xl mx-auto px-4 py-12" data-testid="comment-section">
+        <div className="border-t border-gray-700 pt-8">
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-6">
+            <MessageCircle className="text-st-red" size={24} />
+            <h2 className="text-2xl font-display font-bold text-gray-200">
+              Comments <span className="text-gray-500 text-lg">({comments.length})</span>
+            </h2>
+          </div>
 
-        {/* Comment Form */}
-        <CommentForm chapterId={chapterId} onCommentAdded={handleCommentAdded} />
+          {/* Comment Form */}
+          <CommentForm 
+            chapterId={chapterId} 
+            onCommentAdded={handleCommentAdded}
+            onSuccess={success}
+            onError={showError}
+          />
 
         {/* Comments List */}
         <div className="mt-8 space-y-6" role="list" aria-label="Comments">
