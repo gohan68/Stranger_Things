@@ -9,6 +9,11 @@ export const UserMenu: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Get avatar URL from profile or fall back to user metadata
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url;
+  // Get display name from profile or fall back to user metadata
+  const displayName = profile?.display_name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'User';
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -43,11 +48,12 @@ export const UserMenu: React.FC = () => {
             className="flex items-center gap-2 px-3 py-2 hover:bg-white/10 rounded-lg transition-colors"
             data-testid="user-menu-button"
           >
-            {profile?.avatar_url ? (
+            {avatarUrl ? (
               <img
-                src={profile.avatar_url}
-                alt={profile.display_name || 'User'}
-                className="w-8 h-8 rounded-full"
+                src={avatarUrl}
+                alt={displayName}
+                className="w-8 h-8 rounded-full object-cover"
+                referrerPolicy="no-referrer"
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-st-red/20 flex items-center justify-center">
@@ -55,7 +61,7 @@ export const UserMenu: React.FC = () => {
               </div>
             )}
             <span className="hidden sm:inline text-sm font-medium text-gray-300">
-              {profile?.display_name || 'User'}
+              {displayName}
             </span>
           </button>
         )}
@@ -64,7 +70,7 @@ export const UserMenu: React.FC = () => {
         {showMenu && user && (
           <div className="absolute right-0 mt-2 w-56 bg-st-charcoal border border-white/10 rounded-lg shadow-2xl overflow-hidden z-50">
             <div className="px-4 py-3 border-b border-white/10">
-              <p className="text-sm font-medium text-gray-300">{profile?.display_name || 'User'}</p>
+              <p className="text-sm font-medium text-gray-300">{displayName}</p>
               <p className="text-xs text-gray-500 truncate">{user.email}</p>
               {isAdmin && (
                 <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-st-red/20 text-st-red text-xs rounded">
