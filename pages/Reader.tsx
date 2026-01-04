@@ -4,6 +4,7 @@ import { Settings, ChevronLeft, ChevronRight, Menu as MenuIcon } from 'lucide-re
 import { story } from '../story';
 import { ReaderSettings } from '../types';
 import { CommentSection } from '../components/comments/CommentSection';
+import { useReadingProgress } from '../hooks/useReadingProgress';
 
 const defaultSettings: ReaderSettings = {
   fontSize: 18,
