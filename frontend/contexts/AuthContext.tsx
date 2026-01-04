@@ -125,12 +125,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const googlePicture = userToUse?.user_metadata?.picture || userToUse?.user_metadata?.avatar_url;
         const googleName = userToUse?.user_metadata?.full_name || userToUse?.user_metadata?.name;
         
+        console.log('Profile data:', { 
+          hasAvatar: !!data.avatar_url, 
+          hasName: !!data.display_name,
+          googlePicture,
+          googleName 
+        });
+        
         // Update profile if avatar_url or display_name is missing but available from Google
-        if ((!data.avatar_url && googlePicture) || (!data.display_name && googleName)) {
-          console.log('Updating profile with Google metadata...');
+        // Check for null, undefined, or empty string
+        const needsAvatarUpdate = (!data.avatar_url || data.avatar_url.trim() === '') && googlePicture;
+        const needsNameUpdate = (!data.display_name || data.display_name.trim() === '') && googleName;
+        
+        if (needsAvatarUpdate || needsNameUpdate) {
+          console.log('Updating profile with Google metadata...', { needsAvatarUpdate, needsNameUpdate });
           const updates: Partial<Profile> = {};
-          if (!data.avatar_url && googlePicture) updates.avatar_url = googlePicture;
-          if (!data.display_name && googleName) updates.display_name = googleName;
+          if (needsAvatarUpdate) updates.avatar_url = googlePicture;
+          if (needsNameUpdate) updates.display_name = googleName;
           
           const { data: updatedProfile, error: updateError } = await supabase
             .from('profiles')
@@ -140,8 +151,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
           
           if (!updateError && updatedProfile) {
+            console.log('Profile updated successfully:', updatedProfile);
             setProfile(updatedProfile);
             return;
+          } else if (updateError) {
+            console.error('Error updating profile:', updateError);
           }
         }
         setProfile(data);
