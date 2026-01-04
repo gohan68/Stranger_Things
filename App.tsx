@@ -1,5 +1,6 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Reader } from './pages/Reader';
@@ -8,19 +9,21 @@ import { About, Legal } from './pages/StaticPages';
 
 const App: React.FC = () => {
   return (
-    <HashRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/chapters" element={<ChapterIndex />} />
-          <Route path="/read" element={<Reader />} />
-          <Route path="/read/:chapterId" element={<Reader />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/legal" element={<Legal />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
-    </HashRouter>
+    <AuthProvider>
+      <HashRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/chapters" element={<ChapterIndex />} />
+            <Route path="/read" element={<Reader />} />
+            <Route path="/read/:chapterId" element={<Reader />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/legal" element={<Legal />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Layout>
+      </HashRouter>
+    </AuthProvider>
   );
 };
 
