@@ -16,7 +16,7 @@ export const story: Story = {
       "id": "disclaimer",
       "title": "Disclaimer",
       "excerpt": "Legal and creative disclaimer.",
-      "content": "Copyright © 2026 by Sharukesh Gohan\n\nAll rights reserved. No part of this publication may be reproduced, stored or transmitted in any form or by any means, electronic, mechanical, photocopying, recording, scanning, or otherwise without written permission from the publisher. It is illegal to copy this book, post it to a website, or distribute it by any other means without permission.\n\nDisclaimer:\nI do not own Stranger Things or its characters.\nThis is purely a fan rewrite created out of love and for emotional closure ❤️"
+      "content": "I do not own Stranger Things or its characters. This is purely a fan rewrite created out of love and for emotional closure ❤️"
     },
     {
       "id": "ch1",
