@@ -158,37 +158,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .select()
             .single();
 
-          if (error) {
+          if (!error && updatedProfile) {
+            setProfile(updatedProfile);
+          } else {
+            // If update failed, fetch current profile
             console.error('Error updating profile:', error);
-            // Fetch the profile anyway
             const { data } = await supabase
               .from('profiles')
               .select('*')
               .eq('id', userId)
               .single();
-            setProfile(data);
-          } else {
-            setProfile(updatedProfile);
+            if (data) setProfile(data);
           }
         } else {
-          // No metadata to sync, just use existing profile
+          // No metadata to sync, just fetch existing profile
           const { data } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', userId)
             .single();
-          setProfile(data);
+          if (data) setProfile(data);
         }
       }
     } catch (error) {
       console.error('Error syncing profile from metadata:', error);
       // Fallback to fetching the profile
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      setProfile(data);
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        if (data) setProfile(data);
+      } catch (e) {
+        console.error('Error fetching profile as fallback:', e);
+      }
     }
   };
 
