@@ -116,7 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching profile:', error);
       } else {
         // If profile exists but avatar_url is missing, try to sync from user metadata
-        if (data && !data.avatar_url) {
+        // Only sync once per session to avoid excessive re-renders
+        if (data && !data.avatar_url && !profileSyncedRef.current.has(userId)) {
+          profileSyncedRef.current.add(userId);
           await syncProfileFromMetadata(userId);
         } else {
           setProfile(data);
