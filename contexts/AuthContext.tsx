@@ -244,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const value = {
+  const value = React.useMemo(() => ({
     user,
     profile,
     session,
@@ -253,7 +253,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithGoogle,
     signOut,
     isGuest: !user,
-  };
+  }), [user, profile, session, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
