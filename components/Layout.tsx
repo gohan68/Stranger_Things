@@ -31,18 +31,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <nav className="hidden md:flex items-center gap-6">
             <Link
               to="/chapters"
-              className={`font-display tracking-wide transition-colors ${
-                isActive('/chapters') ? 'text-st-red' : 'text-gray-400 hover:text-gray-200'
-              }`}
+              className={`font-display tracking-wide transition-colors ${isActive('/chapters') ? 'text-st-red' : 'text-gray-400 hover:text-gray-200'
+                }`}
               data-testid="nav-chapters-link"
             >
               CHAPTERS
             </Link>
             <Link
               to="/about"
-              className={`font-display tracking-wide transition-colors ${
-                isActive('/about') ? 'text-st-red' : 'text-gray-400 hover:text-gray-200'
-              }`}
+              className={`font-display tracking-wide transition-colors ${isActive('/about') ? 'text-st-red' : 'text-gray-400 hover:text-gray-200'
+                }`}
               data-testid="nav-about-link"
             >
               ABOUT
@@ -50,9 +48,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             {isAdmin && (
               <Link
                 to="/admin"
-                className={`font-display tracking-wide transition-colors flex items-center gap-1 ${
-                  isActive('/admin') ? 'text-st-red' : 'text-yellow-400 hover:text-yellow-300'
-                }`}
+                className={`font-display tracking-wide transition-colors flex items-center gap-1 ${isActive('/admin') ? 'text-st-red' : 'text-yellow-400 hover:text-yellow-300'
+                  }`}
                 data-testid="nav-admin-link"
               >
                 <Shield size={16} />
@@ -63,8 +60,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
           {/* Auth & Mobile Menu */}
           <div className="flex items-center gap-3">
-            <SyncStatusIndicator />
-            
+            {/* Hide sync indicator on mobile to avoid blocking user menu */}
+            <div className="hidden sm:block">
+              <SyncStatusIndicator />
+            </div>
+
             {user ? (
               <UserMenu />
             ) : (
@@ -94,22 +94,20 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <Link
                 to="/chapters"
                 onClick={() => setShowMenu(false)}
-                className={`px-4 py-2 rounded font-display tracking-wide transition-colors ${
-                  isActive('/chapters')
+                className={`px-4 py-2 rounded font-display tracking-wide transition-colors ${isActive('/chapters')
                     ? 'bg-st-red/20 text-st-red'
                     : 'hover:bg-white/5 text-gray-400'
-                }`}
+                  }`}
               >
                 CHAPTERS
               </Link>
               <Link
                 to="/about"
                 onClick={() => setShowMenu(false)}
-                className={`px-4 py-2 rounded font-display tracking-wide transition-colors ${
-                  isActive('/about')
+                className={`px-4 py-2 rounded font-display tracking-wide transition-colors ${isActive('/about')
                     ? 'bg-st-red/20 text-st-red'
                     : 'hover:bg-white/5 text-gray-400'
-                }`}
+                  }`}
               >
                 ABOUT
               </Link>
@@ -117,11 +115,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <Link
                   to="/admin"
                   onClick={() => setShowMenu(false)}
-                  className={`px-4 py-2 rounded font-display tracking-wide transition-colors flex items-center gap-2 ${
-                    isActive('/admin')
+                  className={`px-4 py-2 rounded font-display tracking-wide transition-colors flex items-center gap-2 ${isActive('/admin')
                       ? 'bg-yellow-900/20 text-yellow-400'
                       : 'hover:bg-white/5 text-yellow-400'
-                  }`}
+                    }`}
                 >
                   <Shield size={16} />
                   ADMIN DASHBOARD

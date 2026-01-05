@@ -1,35 +1,25 @@
 -- ============================================
--- FIX: Grant permissions on views
--- Issue: Views don't inherit RLS policies from base tables
--- Solution: Explicitly grant SELECT on views
+-- FIX: Comments View Permissions for Authenticated Users
+-- 
+-- ISSUE: The comments_with_authors view was only granted to 'anon' role,
+--        but not to 'authenticated' role. This causes logged-in users
+--        to see loading skeletons that never resolve (no data returned).
+--
+-- RUN THIS IN YOUR SUPABASE SQL EDITOR
 -- ============================================
 
--- Grant SELECT permission on comments_with_authors view to all roles
-GRANT SELECT ON public.comments_with_authors TO anon, authenticated;
+-- Grant SELECT on the comments_with_authors view to authenticated users
+GRANT SELECT ON public.comments_with_authors TO authenticated;
 
--- Ensure the view is accessible
--- Note: The view already filters deleted comments, so this is safe
-ALTER VIEW public.comments_with_authors OWNER TO postgres;
-
--- Verify permissions (optional check)
--- You should see 'anon' and 'authenticated' in the grantee list
--- SELECT grantee, privilege_type 
--- FROM information_schema.role_table_grants 
--- WHERE table_name='comments_with_authors';
-
--- ============================================
--- ALTERNATIVE: If view still has issues, recreate with security definer
--- ============================================
-
--- Drop and recreate the view with SECURITY DEFINER
-DROP VIEW IF EXISTS public.comments_with_authors;
-
-CREATE VIEW public.comments_with_authors 
-WITH (security_invoker = false) AS
+-- Also ensure the view has proper security context
+-- Using SECURITY INVOKER means the view respects the caller's permissions
+-- This should already be the default, but we make it explicit
+CREATE OR REPLACE VIEW public.comments_with_authors
+WITH (security_invoker = true)
+AS
 SELECT 
   c.id,
   c.chapter_id,
-  c.user_id,
   c.content,
   c.is_anonymous,
   c.is_flagged,
@@ -48,11 +38,18 @@ SELECT
 FROM public.comments c
 LEFT JOIN public.profiles p ON c.user_id = p.id
 WHERE c.is_deleted = FALSE
-ORDER BY c.created_at DESC;
+ORDER BY c.created_at ASC;
 
--- Grant permissions again after recreating
-GRANT SELECT ON public.comments_with_authors TO anon, authenticated;
+-- Re-apply grants after recreating the view
+GRANT SELECT ON public.comments_with_authors TO anon;
+GRANT SELECT ON public.comments_with_authors TO authenticated;
+
+-- Verify the grants are applied (you can run this to check)
+-- SELECT grantee, privilege_type 
+-- FROM information_schema.role_table_grants 
+-- WHERE table_name = 'comments_with_authors';
 
 -- ============================================
--- COMPLETE!
+-- After running this script, refresh your page
+-- and the comments should load for logged-in users.
 -- ============================================

@@ -260,6 +260,9 @@ GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
 GRANT SELECT ON public.comments_with_authors TO anon;
 GRANT SELECT ON public.profiles TO anon;
 
+-- Authenticated users also need access to the view (views aren't included in ALL TABLES grant)
+GRANT SELECT ON public.comments_with_authors TO authenticated;
+
 COMMENT ON TABLE public.profiles IS 'Extended user profile data linked to auth.users';
 COMMENT ON TABLE public.comments IS 'Chapter comments with anonymous support and moderation';
 COMMENT ON TABLE public.reading_progress IS 'User reading progress synced across devices';

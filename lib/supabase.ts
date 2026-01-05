@@ -30,6 +30,7 @@ export interface Comment {
   id: string;
   chapter_id: string;
   user_id: string | null;
+  parent_id: string | null;
   content: string;
   is_anonymous: boolean;
   is_flagged: boolean;
@@ -42,6 +43,9 @@ export interface CommentWithAuthor extends Comment {
   author_name: string;
   author_avatar: string | null;
   flag_count: number;
+  like_count: number;
+  replies?: CommentWithAuthor[];
+  isLikedByUser?: boolean;
 }
 
 export interface ReadingProgress {

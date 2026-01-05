@@ -8,47 +8,53 @@ export interface CreateCommentData {
 }
 
 /**
- * Fetch all comments for a chapter
+ * Fetch all comments for a chapter using direct REST API
+ * Note: Uses direct fetch instead of Supabase client to avoid auth-related hanging issues
  */
 export const fetchComments = async (chapterId: string): Promise<CommentWithAuthor[]> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[Comments] Missing Supabase configuration');
+    return [];
+  }
+
+  // Use direct REST API call to bypass Supabase client issues with authenticated users
+  const url = `${supabaseUrl}/rest/v1/comments_with_authors?chapter_id=eq.${encodeURIComponent(chapterId)}&order=created_at.asc`;
+
   try {
-    const { data, error } = await supabase
-      .from('comments_with_authors')
-      .select('*')
-      .eq('chapter_id', chapterId)
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: true });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    if (error) {
-      console.error('Supabase error fetching comments:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      signal: controller.signal
+    });
 
-      // Check for permission/policy errors
-      if (error.code === '42501' || error.message.includes('permission denied') || error.message.includes('policy')) {
-        console.error('⚠️ RLS POLICY ERROR: The comments_with_authors view is restricted.');
-        console.error('🔧 FIX: Run /app/supabase/fix-view-permissions.sql in Supabase SQL Editor');
-        throw new Error('Permission denied. Please check database policies.');
-      }
+    clearTimeout(timeoutId);
 
-      // If table doesn't exist or there's a database issue, return empty array
-      if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
-        console.warn('Comments table not initialized yet. Please run the schema.sql in Supabase.');
-        return [];
-      }
-      throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Comments] API error:', response.status, errorText);
+      return [];
     }
-    return data || [];
+
+    const data = await response.json();
+    return data as CommentWithAuthor[];
   } catch (error: any) {
-    console.error('Error fetching comments:', error);
-    // If it's a permission error, throw it to show user a message
-    if (error.message?.includes('Permission denied')) {
-      throw error;
+    if (error.name === 'AbortError') {
+      console.error('[Comments] Request timed out');
+    } else {
+      console.error('[Comments] Fetch error:', error.message);
     }
-    // Otherwise return empty array to prevent UI crashes
     return [];
   }
 };
@@ -63,7 +69,7 @@ export const createComment = async (commentData: CreateCommentData): Promise<Com
     const currentHour = Math.floor(Date.now() / 3600000);
     const rateLimitKey = `comment_rate_limit_${currentHour}`;
     const recentComments = localStorage.getItem(rateLimitKey);
-    
+
     if (recentComments) {
       const count = parseInt(recentComments);
       if (count >= 10) {
@@ -86,11 +92,11 @@ export const createComment = async (commentData: CreateCommentData): Promise<Com
       console.error('Supabase error creating comment:', error);
       throw new Error(error.message || 'Failed to post comment. Please try again.');
     }
-    
+
     if (!data) {
       throw new Error('No data returned from comment creation');
     }
-    
+
     return data;
   } catch (error: any) {
     console.error('Error creating comment:', error);
@@ -164,4 +170,197 @@ export const subscribeToComments = (
   return () => {
     supabase.removeChannel(channel);
   };
+};
+
+/**
+ * Like a comment
+ */
+export const likeComment = async (commentId: string, userId: string, accessToken: string): Promise<boolean> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[Comments] Missing Supabase configuration');
+    return false;
+  }
+
+  try {
+    const url = `${supabaseUrl}/rest/v1/comment_likes`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        comment_id: commentId,
+        user_id: userId
+      })
+    });
+
+    if (response.status === 201 || response.status === 200) {
+      return true;
+    }
+
+    // 409 Conflict means already liked (unique constraint)
+    if (response.status === 409) {
+      return true;
+    }
+
+    console.error('[Comments] Like failed:', response.status);
+    return false;
+  } catch (error) {
+    console.error('[Comments] Error liking comment:', error);
+    return false;
+  }
+};
+
+/**
+ * Unlike a comment
+ */
+export const unlikeComment = async (commentId: string, userId: string, accessToken: string): Promise<boolean> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[Comments] Missing Supabase configuration');
+    return false;
+  }
+
+  try {
+    const url = `${supabaseUrl}/rest/v1/comment_likes?comment_id=eq.${commentId}&user_id=eq.${userId}`;
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('[Comments] Error unliking comment:', error);
+    return false;
+  }
+};
+
+/**
+ * Get all likes by a user for comments in a chapter (for highlighting liked comments)
+ */
+export const getUserLikes = async (chapterId: string, userId: string, accessToken: string): Promise<string[]> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey || !userId) {
+    return [];
+  }
+
+  try {
+    // First get comment IDs for this chapter, then filter likes
+    const likesUrl = `${supabaseUrl}/rest/v1/comment_likes?user_id=eq.${userId}&select=comment_id`;
+    const response = await fetch(likesUrl, {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const likes = await response.json();
+      return likes.map((like: { comment_id: string }) => like.comment_id);
+    }
+    return [];
+  } catch (error) {
+    console.error('[Comments] Error fetching user likes:', error);
+    return [];
+  }
+};
+
+/**
+ * Create a reply to a comment
+ */
+export const createReply = async (
+  parentId: string,
+  chapterId: string,
+  content: string,
+  isAnonymous: boolean,
+  userId: string | null,
+  accessToken: string
+): Promise<boolean> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[Comments] Missing Supabase configuration');
+    return false;
+  }
+
+  try {
+    const url = `${supabaseUrl}/rest/v1/comments`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        parent_id: parentId,
+        chapter_id: chapterId,
+        content: content,
+        is_anonymous: isAnonymous,
+        user_id: isAnonymous ? null : userId
+      })
+    });
+
+    return response.status === 201 || response.status === 200;
+  } catch (error) {
+    console.error('[Comments] Error creating reply:', error);
+    return false;
+  }
+};
+
+/**
+ * Organize flat comments into threaded structure
+ */
+export const organizeCommentsIntoThreads = (comments: CommentWithAuthor[]): CommentWithAuthor[] => {
+  const commentMap = new Map<string, CommentWithAuthor>();
+  const topLevelComments: CommentWithAuthor[] = [];
+
+  // First pass: create a map of all comments
+  comments.forEach(comment => {
+    commentMap.set(comment.id, { ...comment, replies: [] });
+  });
+
+  // Second pass: organize into parent-child relationships
+  comments.forEach(comment => {
+    const commentWithReplies = commentMap.get(comment.id)!;
+
+    if (comment.parent_id && commentMap.has(comment.parent_id)) {
+      // This is a reply - add to parent's replies
+      const parent = commentMap.get(comment.parent_id)!;
+      if (!parent.replies) parent.replies = [];
+      parent.replies.push(commentWithReplies);
+    } else {
+      // This is a top-level comment
+      topLevelComments.push(commentWithReplies);
+    }
+  });
+
+  // Sort replies by created_at
+  topLevelComments.forEach(comment => {
+    if (comment.replies) {
+      comment.replies.sort((a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    }
+  });
+
+  return topLevelComments;
 };
