@@ -29,11 +29,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
       return;
     }
 
-    // Reset loading state when chapter changes
-    setLoading(true);
-    setError(null);
-
-    loadComments();
+    // Load comments initially with loading skeleton
+    loadComments(true);
 
     // Subscribe to real-time updates
     const unsubscribe = subscribeToComments(chapterId, () => {
@@ -64,9 +61,8 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ chapterId }) => 
         setError('Failed to load comments. Please try again later.');
       }
     } finally {
-      if (showLoading) {
-        setLoading(false);
-      }
+      // Always set loading to false after attempting to load
+      setLoading(false);
     }
   };
 
